@@ -2,6 +2,10 @@
 
 ## Objective
 
+## Topology
+
+![Router-on-a-Stick Topology](./topology.png)
+
 Cisco Packet Tracer에서 VLAN 10과 VLAN 20을 구성하고  
 Router-on-a-Stick 방식을 이용해 서로 다른 VLAN 간의 통신을 구현했습니다.
 

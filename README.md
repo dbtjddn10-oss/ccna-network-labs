@@ -1,12 +1,32 @@
 <p align="center">
-  <img src="./labs/03-router-on-a-stick/topology.png" alt="Router-on-a-Stick Lab" width="32%">
-  <img src="./labs/04-static-routing/topology.png" alt="Static Routing Lab" width="32%">
-  <img src="./labs/05-ipv4-subnetting/topology.png" alt="IPv4 Subnetting Lab" width="32%">
+  <img src="./labs/05-ipv4-subnetting/topology.png" alt="IPv4 Subnetting Lab" width="1000">
 </p>
 
 <p align="center">
-  <b>Router-on-a-Stick · Static Routing · IPv4 Subnetting</b>
+  <b>Lab 05 — IPv4 Subnetting / Proxy ARP Troubleshooting</b>
 </p>
+
+<br>
+
+<p align="center">
+  <img src="./labs/04-static-routing/topology.png" alt="Static Routing Lab" width="1000">
+</p>
+
+<p align="center">
+  <b>Lab 04 — Static Routing / Routing Troubleshooting</b>
+</p>
+
+<br>
+
+<p align="center">
+  <img src="./labs/03-router-on-a-stick/topology.png" alt="Router-on-a-Stick Lab" width="1000">
+</p>
+
+<p align="center">
+  <b>Lab 03 — VLAN / Router-on-a-Stick</b>
+</p>
+
+<br>
 
 # CCNA Network Labs
 

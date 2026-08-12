@@ -1,4 +1,14 @@
 <p align="center">
+  <img src="./labs/07-etherchannel-lacp/topology.png" alt="EtherChannel LACP Lab" width="1000">
+</p>
+
+<p align="center">
+  <b>Lab 07 — EtherChannel · LACP · Link Aggregation · Failover</b>
+</p>
+
+<br>
+
+<p align="center">
   <img src="./labs/06-stp-rstp/topology.png" alt="STP RSTP Lab" width="1000">
 </p>
 
@@ -71,7 +81,7 @@ Cisco Packet Tracer와 Cisco IOS CLI를 활용하여
 | [Lab 04](./labs/04-static-routing/README.md) | Static Routing | Static Route, Next Hop, /30, CDP, Routing Troubleshooting | ✅ 완료 |
 | [Lab 05](./labs/05-ipv4-subnetting/README.md) | IPv4 Subnetting | CIDR, /26 Subnetting, Proxy ARP, Subnet Troubleshooting | ✅ 완료 |
 | [Lab 06](./labs/06-stp-rstp/README.md) | STP / RSTP | Root Bridge, Port Role, Redundancy, Failover, Rapid PVST+ | ✅ 완료 |
-| Lab 07 | EtherChannel | LACP, Link Aggregation | ⏳ 예정 |
+| [Lab 07](./labs/07-etherchannel-lacp/README.md) | EtherChannel / LACP | Port-channel, LACP, Link Aggregation, Member Failure, Load Balancing | ✅ 완료 |
 | Lab 08 | OSPF | Dynamic Routing, Neighbor, Route Learning | ⏳ 예정 |
 | Lab 09 | DHCP | DHCP Server, Address Allocation, DHCP Relay | ⏳ 예정 |
 | Lab 10 | NAT / PAT | Private/Public IP, Address Translation | ⏳ 예정 |
@@ -119,6 +129,15 @@ Cisco Packet Tracer와 Cisco IOS CLI를 활용하여
 - STP Path Cost
 - Layer 2 Redundancy
 - Link Failover
+- EtherChannel
+- LACP
+- Link Aggregation
+- Port-channel
+- LACP Active / Passive
+- EtherChannel Member Port
+- EtherChannel Load Balancing
+- Source MAC Hash
+- EtherChannel Failover
 
 ---
 
@@ -161,7 +180,10 @@ Cisco Packet Tracer와 Cisco IOS CLI를 활용하여
 - `show cdp neighbors`
 - `show spanning-tree vlan 1`
 - `show spanning-tree summary`
+- `show etherchannel summary`
+- `show etherchannel load-balance`
 - `show running-config`
+- `show running-config | include channel-group`
 - Interface Mapping 확인
 - Routing Table 분석
 - Subnet Mask 오류 분석
@@ -170,6 +192,10 @@ Cisco Packet Tracer와 Cisco IOS CLI를 활용하여
 - STP Port Role 분석
 - Root Path Cost 분석
 - Link Failure / Failover 검증
+- EtherChannel Member 상태 분석
+- LACP Mode 확인
+- EtherChannel 설정 불일치 분석
+- Packet Tracer 시뮬레이션 동작 차이 확인
 
 ---
 
@@ -438,9 +464,6 @@ Gi0/1 → Root FWD
 Gi0/2 → Altn BLK
 ```
 
-즉 하나의 경로는 정상 Forwarding하고,
-다른 경로는 Loop 방지를 위한 Alternate / Blocking 상태로 유지되었습니다.
-
 ---
 
 ## STP Link Failure 테스트
@@ -467,73 +490,47 @@ Root FWD
 4
 ```
 
-대체 경로 사용 후:
+대체 경로:
 
 ```text
 4 + 4 = 8
 ```
 
-로 변경되었습니다.
-
 ---
 
 ## Root Bridge 직접 지정
 
-Switch2의 Priority를 낮춰 원하는 Switch를 Root Bridge로 지정했습니다.
+Switch2의 Priority를 낮춰 Root Bridge를 변경했습니다.
 
 ```cisco
-configure terminal
-
 spanning-tree vlan 1 priority 24576
-
-end
 ```
 
 확인:
 
 ```text
-Root ID Priority 24577
-
 This bridge is the root
 ```
 
-따라서:
-
-```text
-Switch2 = Root Bridge
-```
-
-로 변경되었습니다.
-
 ---
 
-## Rapid PVST+ 적용
-
-모든 Switch에서:
+## Rapid PVST+
 
 ```cisco
-configure terminal
-
 spanning-tree mode rapid-pvst
-
-end
 ```
 
-설정했습니다.
-
-확인 결과:
+확인:
 
 ```text
 Spanning tree enabled protocol rstp
 ```
 
-를 통해 RSTP 기반 Rapid PVST+가 활성화된 것을 확인했습니다.
-
 ---
 
-## RSTP Failover 테스트
+## RSTP Failover
 
-Switch0에서 Root Bridge인 Switch2로 연결된 Interface를 비활성화했습니다.
+Switch0에서 Switch2 방향 Interface를 비활성화했습니다.
 
 ```cisco
 interface gigabitethernet 0/2
@@ -544,67 +541,328 @@ interface gigabitethernet 0/2
 
 ```text
 Switch0 → Switch2
-
-Root Path Cost = 4
+Cost 4
 ```
 
 장애 후:
 
 ```text
 Switch0 → Switch1 → Switch2
-
-Root Path Cost = 8
-```
-
-로 경로가 변경되었습니다.
-
-출력:
-
-```text
-Root ID
 Cost 8
-Port GigabitEthernet0/1
-
-Gi0/1 Root FWD Cost 4
 ```
 
-대체 경로를 통해 PC0 ↔ PC1 Ping도 정상적으로 성공했습니다.
-
-장애 테스트 후:
-
-```cisco
-interface gigabitethernet 0/2
- no shutdown
-```
-
-으로 Interface를 복구했습니다.
+대체 경로를 통해 PC0 ↔ PC1 Ping 성공을 확인했습니다.
 
 ### 주요 학습 내용
 
 - Layer 2 Loop
 - Broadcast Storm
-- STP
-- RSTP
+- STP / RSTP
 - Rapid PVST+
 - Root Bridge
-- Bridge ID
-- Bridge Priority
+- Bridge ID / Priority
 - Root Port
 - Designated Port
 - Alternate Port
-- Forwarding / Blocking
-- STP Path Cost
-- Root Path Cost
+- Path Cost
 - Layer 2 Redundancy
-- Link Failure
 - Failover
-- Root Bridge 직접 지정
 - Topology Recalculation
-- Interface Shutdown / Recovery
 
 ➡️ [Lab 06 상세 README](./labs/06-stp-rstp/README.md)
 
 ➡️ [Packet Tracer 파일](./labs/06-stp-rstp/06-stp-rstp.pkt)
+
+---
+
+# Lab 07 - EtherChannel / LACP
+
+<p align="center">
+  <img src="./labs/07-etherchannel-lacp/topology.png" alt="EtherChannel LACP Topology" width="900">
+</p>
+
+Switch 두 대 사이에 두 개의 GigabitEthernet Link를 구성하고  
+**LACP EtherChannel을 이용해 여러 물리 Link를 하나의 논리 Port-channel로 묶었습니다.**
+
+```text
+PC0                                      PC1
+ |                                        |
+Switch0 =============================== Switch1
+       Gi0/1                    Gi0/1
+       Gi0/2                    Gi0/2
+
+            LACP EtherChannel
+               Port-channel1
+```
+
+EtherChannel 설정 전에는 STP가 두 Link를 개별 경로로 인식하여:
+
+```text
+Gi0/1 Root FWD
+Gi0/2 Altn BLK
+```
+
+상태가 되는 것을 확인했습니다.
+
+---
+
+## LACP EtherChannel 구성
+
+Switch0:
+
+```cisco
+interface range gigabitethernet 0/1 - 2
+ channel-group 1 mode active
+```
+
+Switch1:
+
+```cisco
+interface range gigabitethernet 0/1 - 2
+ channel-group 1 mode passive
+```
+
+정상 상태:
+
+```text
+Po1(SU)   LACP   Gig0/1(P) Gig0/2(P)
+```
+
+의미:
+
+```text
+Po1 = Port-channel1
+S   = Layer 2
+U   = In Use
+P   = 정상적으로 Port-channel에 Bundle된 Member
+```
+
+---
+
+## EtherChannel과 STP
+
+EtherChannel 적용 전:
+
+```text
+Gi0/1
+Gi0/2
+
+→ STP가 별개의 Link로 처리
+```
+
+EtherChannel 적용 후:
+
+```text
+Gi0/1 ┐
+      ├── Po1
+Gi0/2 ┘
+
+→ STP가 하나의 논리 Link로 처리
+```
+
+실제 STP 출력:
+
+```text
+Po1 Root FWD
+```
+
+을 확인했습니다.
+
+---
+
+## STP Cost 변화
+
+물리 GigabitEthernet Link 하나를 사용할 때:
+
+```text
+Cost = 4
+```
+
+두 Member가 정상적으로 EtherChannel에 Bundle된 Packet Tracer 환경에서는:
+
+```text
+Po1 Cost = 3
+```
+
+을 확인했습니다.
+
+---
+
+## Member Link 장애 테스트
+
+Switch0의 Gi0/1을 비활성화했습니다.
+
+```cisco
+interface gigabitethernet 0/1
+ shutdown
+```
+
+EtherChannel 상태:
+
+```text
+Po1(SU)   LACP   Gig0/1(D) Gig0/2(P)
+```
+
+즉:
+
+```text
+Gi0/1 = Down
+Gi0/2 = 정상
+Po1   = 정상 유지
+```
+
+Member Link 하나가 Down 상태가 되어도
+나머지 Member를 통해 PC0 ↔ PC1 통신이 유지되는 것을 확인했습니다.
+
+Member가 하나만 남은 상태에서는:
+
+```text
+Po1 Cost 3 → 4
+```
+
+로 변경되는 것도 확인했습니다.
+
+---
+
+## Member 복구
+
+```cisco
+interface gigabitethernet 0/1
+ no shutdown
+```
+
+복구 후:
+
+```text
+Po1(SU)
+Gi0/1(P)
+Gi0/2(P)
+```
+
+상태로 돌아왔습니다.
+
+---
+
+## LACP Active / Passive
+
+LACP Mode:
+
+```text
+active
+passive
+```
+
+정상적인 조합:
+
+```text
+active + active
+active + passive
+```
+
+정상적으로 협상되지 않는 조합:
+
+```text
+passive + passive
+```
+
+입니다.
+
+Packet Tracer에서는 양쪽을 Passive로 설정한 뒤에도
+기존 `Po1(SU)` 상태가 유지되는 시뮬레이션 동작 차이를 확인했습니다.
+
+Running Configuration을 통해 양쪽 모두:
+
+```text
+channel-group 1 mode passive
+```
+
+상태인 것을 검증했으며,
+실제 개념과 시뮬레이터 동작을 구분하여 기록했습니다.
+
+---
+
+## EtherChannel 설정 불일치
+
+Switch1의 Gi0/2에서:
+
+```cisco
+no channel-group 1
+```
+
+을 적용하여 의도적으로 양쪽 EtherChannel 설정을 다르게 만들었습니다.
+
+이 상태에서도 살아 있는 경로가 존재해 Ping이 성공할 수 있었습니다.
+
+따라서:
+
+```text
+Ping 성공
+≠
+EtherChannel 전체 구성 정상
+```
+
+이라는 점을 확인했습니다.
+
+EtherChannel 상태는 반드시:
+
+```cisco
+show etherchannel summary
+```
+
+를 통해 Member Port의 상태를 검증해야 합니다.
+
+---
+
+## Load Balancing
+
+```cisco
+show etherchannel load-balance
+```
+
+결과:
+
+```text
+EtherChannel Load-Balancing Operational State (src-mac)
+
+Non-IP: Source MAC address
+IPv4:   Source MAC address
+IPv6:   Source MAC address
+```
+
+이번 Switch에서는:
+
+```text
+src-mac
+```
+
+기준의 Load Balancing이 사용되고 있음을 확인했습니다.
+
+EtherChannel은 하나의 단일 Flow를 단순히 두 Link에 반씩 나누는 방식이 아니라
+Hash를 이용해 Traffic Flow를 Member Link에 분산합니다.
+
+### 주요 학습 내용
+
+- EtherChannel
+- LACP
+- Link Aggregation
+- Port-channel
+- LACP Active / Passive
+- Interface Range
+- Channel-group
+- Po1(SU)
+- Member Port `(P)`
+- Member Down `(D)`
+- STP와 EtherChannel의 관계
+- Member Link Failover
+- STP Cost 변화
+- EtherChannel 설정 불일치
+- Load Balancing
+- Source MAC Hash
+- Verification / Troubleshooting
+
+➡️ [Lab 07 상세 README](./labs/07-etherchannel-lacp/README.md)
+
+➡️ [Packet Tracer 파일](./labs/07-etherchannel-lacp/07-etherchannel-lacp.pkt)
 
 ---
 
@@ -643,43 +901,24 @@ up / up
 show cdp neighbors
 ```
 
-명령어로 실제 Router 간 연결 Interface를 확인했습니다.
+를 통해 실제 Router 간 Interface 연결을 확인했습니다.
 
-확인 결과 Router1의 IP Address가 실제 케이블 연결 구조와 반대로 설정되어 있었습니다.
-
-잘못된 구성:
-
-```text
-Router1 G0/0 → 192.168.20.1/24
-Router1 G0/1 → 10.0.0.2/30
-```
-
-실제 구조:
-
-```text
-Router1 G0/0 → Router0
-Router1 G0/1 → Switch1
-```
-
-수정:
-
-```text
-Router1 G0/0 → 10.0.0.2/30
-Router1 G0/1 → 192.168.20.1/24
-```
-
-수정 후 Router 간 Ping이 정상적으로 성공했습니다.
+Router1의 IP Address가 실제 케이블 연결 구조와 반대로 설정되어 있던 것을 발견했습니다.
 
 ### 배운 점
 
-`up/up`은 Interface와 Line Protocol이 동작한다는 의미이며,  
-의도한 Network와 올바른 상대 장비가 연결되었다는 의미는 아닙니다.
+```text
+up/up
+```
+
+은 Interface와 Line Protocol이 동작한다는 의미일 뿐,
+의도한 Network와 올바른 상대 장비에 연결됐다는 의미는 아닙니다.
 
 ---
 
 ## 2. Overlapping Network 오류
 
-Interface IP Address 변경 과정에서:
+Interface IP 변경 과정에서:
 
 ```text
 % 10.0.0.0 overlaps with GigabitEthernet0/1
@@ -687,14 +926,13 @@ Interface IP Address 변경 과정에서:
 
 오류가 발생했습니다.
 
-기존 Interface에 같은 Network가 설정되어 있었기 때문입니다.
+기존 Interface의 IP를:
 
 ```cisco
 no ip address
 ```
 
-로 기존 IP Address를 먼저 제거한 후
-올바른 Interface에 다시 설정하여 해결했습니다.
+로 제거한 후 올바른 Interface에 다시 설정하여 해결했습니다.
 
 ---
 
@@ -706,7 +944,7 @@ PC0의 정상 설정:
 192.168.10.10/26
 ```
 
-을 의도적으로:
+을:
 
 ```text
 192.168.10.10/24
@@ -714,106 +952,144 @@ PC0의 정상 설정:
 
 로 변경했습니다.
 
-PC0는 `192.168.10.70`을 같은 Local Network에 있다고 잘못 판단했습니다.
-
-하지만 예상과 다르게 Ping이 성공했습니다.
-
-Router에서:
+예상과 다르게 Ping이 성공했고:
 
 ```cisco
 show ip interface gigabitethernet 0/0
 ```
 
-확인 결과:
+에서:
 
 ```text
 Proxy ARP is enabled
 ```
 
-상태였습니다.
+상태임을 확인했습니다.
 
-Proxy ARP를 비활성화했습니다.
-
-```cisco
-interface gigabitethernet 0/0
- no ip proxy-arp
-```
-
-PC0의 ARP Cache도 삭제했습니다.
-
-```text
-arp -d
-```
-
-이후 잘못된 `/24` 상태에서 Ping이 실패하는 것을 확인했습니다.
-
-Subnet Mask를 정상 `/26`으로 복구한 후 다시 통신에 성공했습니다.
-
-실습 종료 후 Proxy ARP도 복구했습니다.
-
-```cisco
-interface gigabitethernet 0/0
- ip proxy-arp
-```
+Proxy ARP를 비활성화하고 ARP Cache를 제거하자
+잘못된 Subnet Mask 상태에서는 Ping이 실패했습니다.
 
 ### 배운 점
 
-**Ping이 성공한다는 사실만으로 Network 설정이 모두 올바르다고 판단해서는 안 됩니다.**
+```text
+Ping 성공
+≠
+Network 설정 전체 정상
+```
 
-Proxy ARP와 같은 기능이 잘못된 설정을 겉으로 가릴 수 있으므로
-IP Address, Subnet Mask, Gateway, ARP, Routing Table을 함께 확인해야 합니다.
+Proxy ARP처럼 잘못된 설정을 겉으로 가리는 기능이 존재할 수 있습니다.
 
 ---
 
-## 4. STP 중복 경로와 Link Failure
+## 4. STP Link Failure
 
-Switch 3대를 삼각형으로 연결하자 하나의 Port가:
-
-```text
-Altn BLK
-```
-
-상태가 되는 것을 확인했습니다.
-
-이는 장애가 아니라 STP가 Layer 2 Loop를 방지하기 위해
-중복 경로 중 하나를 의도적으로 차단한 결과였습니다.
-
-기존 Root Port Link를 제거하자:
+STP가 중복 경로를:
 
 ```text
 Altn BLK
 ```
 
-상태였던 대체 경로가:
+상태로 유지하는 것을 확인했습니다.
+
+기존 Root Port Link 장애 후:
 
 ```text
-Root FWD
+Altn BLK
+→ Root FWD
 ```
 
 로 변경되었습니다.
 
-이후 Rapid PVST+ 환경에서 Interface를 직접 Shutdown하여
-장애 상황을 다시 만들었습니다.
-
-```cisco
-interface gigabitethernet 0/2
- shutdown
-```
-
-RSTP가 새로운 경로를 계산하면서:
-
-```text
-Root Path Cost
-4 → 8
-```
-
-로 변경되었고,
-대체 경로를 통해 PC 간 통신이 계속 가능한 것을 확인했습니다.
+Rapid PVST+ 환경에서도 Interface Shutdown을 통해
+대체 경로가 활성화되는 것을 확인했습니다.
 
 ### 배운 점
 
-STP / RSTP는 단순히 중복 Link를 차단하는 기술이 아니라  
-**Loop를 방지하면서도 장애 발생 시 대체 경로를 사용할 수 있도록 하는 Layer 2 Redundancy 기술**이라는 것을 확인했습니다.
+STP / RSTP는 Layer 2 Loop를 방지하면서
+Network 장애 시 대체 경로를 사용할 수 있도록 합니다.
+
+---
+
+## 5. EtherChannel Member Failure
+
+정상 상태:
+
+```text
+Po1(SU)
+Gi0/1(P)
+Gi0/2(P)
+```
+
+에서 Gi0/1을 Shutdown했습니다.
+
+장애 상태:
+
+```text
+Po1(SU)
+Gi0/1(D)
+Gi0/2(P)
+```
+
+Port-channel은 계속 정상 상태를 유지했고
+PC 간 Ping도 성공했습니다.
+
+### 배운 점
+
+EtherChannel은 여러 물리 Link를 하나의 논리 Link로 구성하기 때문에
+Member 하나가 장애 상태가 되더라도 다른 Member가 남아 있다면
+통신을 유지할 수 있습니다.
+
+---
+
+## 6. EtherChannel 설정 불일치
+
+Switch1의 Gi0/2에서 Channel-group을 제거하여
+양쪽 Member 설정을 의도적으로 다르게 만들었습니다.
+
+Ping은 여전히 성공할 수 있었지만
+EtherChannel 구성 자체는 정상 상태가 아니었습니다.
+
+따라서:
+
+```text
+Ping 성공
+≠
+EtherChannel 정상
+```
+
+이며:
+
+```cisco
+show etherchannel summary
+```
+
+를 통해:
+
+```text
+Po1(SU)
+Gi0/1(P)
+Gi0/2(P)
+```
+
+상태를 반드시 확인해야 한다는 것을 학습했습니다.
+
+---
+
+## 7. Packet Tracer LACP 동작 차이
+
+LACP의 실제 개념에서는:
+
+```text
+passive + passive
+```
+
+조합은 EtherChannel을 새로 협상할 수 없습니다.
+
+Packet Tracer에서는 양쪽 Running Configuration을 Passive로 확인했음에도
+기존 EtherChannel 상태가 계속 유지되는 현상을 확인했습니다.
+
+따라서 시뮬레이터의 결과를 그대로 암기하지 않고
+Protocol의 실제 동작 원리와 시뮬레이션 결과를 구분하여 기록했습니다.
 
 ---
 
@@ -832,40 +1108,7 @@ STP / RSTP는 단순히 중복 Link를 차단하는 기술이 아니라
 Block Size:
 
 ```text
-Block Size
-= 256 - Subnet Mask의 해당 Octet
-```
-
-예:
-
-```text
-/26
-255.255.255.192
-
-256 - 192
-= 64
-```
-
-Network 시작점:
-
-```text
-0
-64
-128
-192
-```
-
-Broadcast:
-
-```text
-다음 Network Address - 1
-```
-
-Host:
-
-```text
-First Host = Network + 1
-Last Host  = Broadcast - 1
+256 - Subnet Mask의 해당 Octet
 ```
 
 ---
@@ -892,28 +1135,45 @@ BLK
 → Blocking
 ```
 
-STP 기본 흐름:
+---
+
+# EtherChannel / LACP Quick Reference
 
 ```text
-Root Bridge 선정
-        ↓
-Root Port 선정
-        ↓
-Designated Port 선정
-        ↓
-중복 경로 차단
+EtherChannel
+→ 여러 물리 Link를 하나의 논리 Link로 묶음
+
+LACP
+→ EtherChannel을 동적으로 협상하는 표준 Protocol
+
+Port-channel
+→ EtherChannel의 논리 Interface
+
+Po1
+→ Port-channel1
+
+Active
+→ LACP 협상을 적극적으로 시작
+
+Passive
+→ 상대방이 협상을 시작하면 응답
+
+Po1(SU)
+→ Layer 2 Port-channel이며 현재 사용 중
+
+Gi0/1(P)
+→ 정상적으로 Port-channel에 Bundle됨
+
+Gi0/1(D)
+→ Member Link Down
 ```
 
-Path Cost 예:
+LACP Mode:
 
 ```text
-FastEthernet
-100 Mbps
-→ Cost 19
-
-GigabitEthernet
-1 Gbps
-→ Cost 4
+active + active   = 가능
+active + passive  = 가능
+passive + passive = 협상 시작 불가
 ```
 
 ---
@@ -948,24 +1208,16 @@ show interfaces status
 
 ---
 
-## Routing Table
+## Routing
 
 ```cisco
 show ip route
 ```
 
----
-
-## Static Route
+Static Route:
 
 ```cisco
 ip route <Destination Network> <Subnet Mask> <Next Hop>
-```
-
-예:
-
-```cisco
-ip route 192.168.20.0 255.255.255.0 10.0.0.2
 ```
 
 ---
@@ -986,17 +1238,10 @@ show mac address-table
 
 ---
 
-## VLAN
+## VLAN / Trunk
 
 ```cisco
 show vlan brief
-```
-
----
-
-## Trunk
-
-```cisco
 show interfaces trunk
 ```
 
@@ -1009,9 +1254,13 @@ show spanning-tree vlan 1
 show spanning-tree summary
 ```
 
----
+Rapid PVST+:
 
-## Root Bridge Priority
+```cisco
+spanning-tree mode rapid-pvst
+```
+
+Root Priority:
 
 ```cisco
 spanning-tree vlan 1 priority 24576
@@ -1019,25 +1268,55 @@ spanning-tree vlan 1 priority 24576
 
 ---
 
-## Rapid PVST+
+## EtherChannel / LACP
+
+LACP Active:
 
 ```cisco
-spanning-tree mode rapid-pvst
+interface range gigabitethernet 0/1 - 2
+ channel-group 1 mode active
+```
+
+LACP Passive:
+
+```cisco
+interface range gigabitethernet 0/1 - 2
+ channel-group 1 mode passive
+```
+
+EtherChannel 확인:
+
+```cisco
+show etherchannel summary
+```
+
+Load Balancing 확인:
+
+```cisco
+show etherchannel load-balance
+```
+
+Channel-group 설정 확인:
+
+```cisco
+show running-config | include channel-group
 ```
 
 ---
 
-## Interface 장애 생성
+## Interface 장애 / 복구
+
+장애:
 
 ```cisco
-interface gigabitethernet 0/2
+interface gigabitethernet 0/1
  shutdown
 ```
 
 복구:
 
 ```cisco
-interface gigabitethernet 0/2
+interface gigabitethernet 0/1
  no shutdown
 ```
 
@@ -1065,7 +1344,7 @@ ip proxy-arp
 
 ---
 
-## 통신 / End Device
+## End Device
 
 ```text
 ping <IP Address>
@@ -1159,13 +1438,43 @@ arp -d
 
 ---
 
+## Day 5
+
+- [x] EtherChannel 개념
+- [x] Link Aggregation
+- [x] EtherChannel 적용 전 STP 동작 확인
+- [x] LACP
+- [x] LACP Active
+- [x] LACP Passive
+- [x] Interface Range
+- [x] Channel-group
+- [x] Port-channel1
+- [x] `Po1(SU)` 확인
+- [x] Member Port `(P)` 확인
+- [x] STP와 EtherChannel 관계 확인
+- [x] EtherChannel 적용 후 STP Cost 변화
+- [x] Member Link Shutdown 장애 테스트
+- [x] Member `(D)` 상태 확인
+- [x] Member 장애 후 Po1 유지 확인
+- [x] Member 장애 상태 Ping 검증
+- [x] Member Link 복구
+- [x] LACP Passive + Passive 테스트
+- [x] Packet Tracer LACP 동작 차이 확인
+- [x] EtherChannel 설정 불일치 생성
+- [x] Ping 성공 ≠ EtherChannel 정상 확인
+- [x] `show etherchannel summary`
+- [x] `show etherchannel load-balance`
+- [x] `src-mac` Load Balancing 확인
+- [x] 최종 End-to-End 통신 검증
+
+---
+
 # 다음 학습
 
-- [ ] EtherChannel
-- [ ] LACP
-- [ ] Link Aggregation
 - [ ] OSPF
 - [ ] Dynamic Routing
+- [ ] OSPF Neighbor
+- [ ] OSPF Route Learning
 - [ ] DHCP
 - [ ] DHCP Relay
 - [ ] NAT / PAT
@@ -1202,10 +1511,15 @@ ccna-network-labs/
     │   ├── topology.png
     │   └── 05-ipv4-subnetting.pkt
     │
-    └── 06-stp-rstp/
+    ├── 06-stp-rstp/
+    │   ├── README.md
+    │   ├── topology.png
+    │   └── 06-stp-rstp.pkt
+    │
+    └── 07-etherchannel-lacp/
         ├── README.md
         ├── topology.png
-        └── 06-stp-rstp.pkt
+        └── 07-etherchannel-lacp.pkt
 ```
 
 각 Lab은 가능한 경우 다음 형식으로 관리합니다.
@@ -1239,16 +1553,34 @@ Network 장애가 발생했을 때 무작정 설정을 변경하기보다
         ↓
 5. STP / Port State 확인
         ↓
-6. ARP / MAC Address Table 확인
+6. EtherChannel / Member 상태 확인
         ↓
-7. Routing Table 확인
+7. ARP / MAC Address Table 확인
         ↓
-8. Ping / Traceroute로 경로 검증
+8. Routing Table 확인
         ↓
-9. 원인 수정
+9. Ping / Traceroute로 경로 검증
         ↓
-10. 정상 통신 재검증
+10. 원인 수정
+        ↓
+11. 정상 상태 재검증
 ```
+
+EtherChannel 문제에서는 특히:
+
+```text
+Ping 성공 여부만 확인하지 않고
+
+show etherchannel summary
+        ↓
+Po1 상태 확인
+        ↓
+Member (P) / (D) 상태 확인
+        ↓
+양쪽 Channel-group 설정 비교
+```
+
+순서로 확인합니다.
 
 ---
 
@@ -1256,7 +1588,7 @@ Network 장애가 발생했을 때 무작정 설정을 변경하기보다
 
 CCNA 학습 과정에서 Cisco Packet Tracer를 이용해 직접 Network를 구성하고,
 
-**Configuration → Verification → Troubleshooting**
+**Configuration → Verification → Troubleshooting → Recovery**
 
 과정을 반복하여 Network 동작 원리를 이해하는 것을 목표로 합니다.
 
@@ -1271,8 +1603,13 @@ CCNA 학습 과정에서 Cisco Packet Tracer를 이용해 직접 Network를 구�
 - Static Route와 Next Hop이 어떤 역할을 하는지
 - STP가 Layer 2 Loop를 어떻게 방지하는지
 - Root Bridge와 Port Role이 어떻게 선정되는지
-- 중복 Link 장애 시 대체 경로가 어떻게 활성화되는지
-- 장애가 발생했을 때 어떤 명령어로 원인을 좁혀야 하는지
+- RSTP가 장애 발생 시 대체 경로를 어떻게 활성화하는지
+- EtherChannel이 여러 물리 Link를 어떻게 하나의 논리 Link로 구성하는지
+- LACP Active / Passive가 어떤 방식으로 동작하는지
+- EtherChannel Member 장애 시 통신이 어떻게 유지되는지
+- STP가 Port-channel을 어떻게 처리하는지
+- Ping 성공과 실제 Network 구성 정상 여부가 왜 다를 수 있는지
+- 장애가 발생했을 때 어떤 `show` 명령어로 원인을 좁혀야 하는지
 
 를 직접 설명하고 검증할 수 있는 수준까지 학습하는 것이 목표입니다.
 

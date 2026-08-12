@@ -1,9 +1,19 @@
 <p align="center">
+  <img src="./labs/06-stp-rstp/topology.png" alt="STP RSTP Lab" width="1000">
+</p>
+
+<p align="center">
+  <b>Lab 06 — STP / RSTP · Redundancy · Failover</b>
+</p>
+
+<br>
+
+<p align="center">
   <img src="./labs/05-ipv4-subnetting/topology.png" alt="IPv4 Subnetting Lab" width="1000">
 </p>
 
 <p align="center">
-  <b>Lab 05 — IPv4 Subnetting / Proxy ARP Troubleshooting</b>
+  <b>Lab 05 — IPv4 Subnetting · Proxy ARP Troubleshooting</b>
 </p>
 
 <br>
@@ -13,7 +23,7 @@
 </p>
 
 <p align="center">
-  <b>Lab 04 — Static Routing / Routing Troubleshooting</b>
+  <b>Lab 04 — Static Routing · Routing Troubleshooting</b>
 </p>
 
 <br>
@@ -23,7 +33,7 @@
 </p>
 
 <p align="center">
-  <b>Lab 03 — VLAN / Router-on-a-Stick</b>
+  <b>Lab 03 — VLAN · Router-on-a-Stick</b>
 </p>
 
 <br>
@@ -60,7 +70,7 @@ Cisco Packet Tracer와 Cisco IOS CLI를 활용하여
 | [Lab 03](./labs/03-router-on-a-stick/README.md) | Router-on-a-Stick | 802.1Q Trunk, Subinterface, Inter-VLAN Routing | ✅ 완료 |
 | [Lab 04](./labs/04-static-routing/README.md) | Static Routing | Static Route, Next Hop, /30, CDP, Routing Troubleshooting | ✅ 완료 |
 | [Lab 05](./labs/05-ipv4-subnetting/README.md) | IPv4 Subnetting | CIDR, /26 Subnetting, Proxy ARP, Subnet Troubleshooting | ✅ 완료 |
-| Lab 06 | STP / RSTP | Loop 방지, Root Bridge, Port Role | ⏳ 예정 |
+| [Lab 06](./labs/06-stp-rstp/README.md) | STP / RSTP | Root Bridge, Port Role, Redundancy, Failover, Rapid PVST+ | ✅ 완료 |
 | Lab 07 | EtherChannel | LACP, Link Aggregation | ⏳ 예정 |
 | Lab 08 | OSPF | Dynamic Routing, Neighbor, Route Learning | ⏳ 예정 |
 | Lab 09 | DHCP | DHCP Server, Address Allocation, DHCP Relay | ⏳ 예정 |
@@ -95,6 +105,20 @@ Cisco Packet Tracer와 Cisco IOS CLI를 활용하여
 - Access Port
 - Trunk Port
 - IEEE 802.1Q
+- STP
+- RSTP
+- Rapid PVST+
+- Layer 2 Loop
+- Broadcast Storm
+- Root Bridge
+- Bridge ID
+- Bridge Priority
+- Root Port
+- Designated Port
+- Alternate Port
+- STP Path Cost
+- Layer 2 Redundancy
+- Link Failover
 
 ---
 
@@ -135,27 +159,30 @@ Cisco Packet Tracer와 Cisco IOS CLI를 활용하여
 - `show ip interface`
 - `show ip route`
 - `show cdp neighbors`
+- `show spanning-tree vlan 1`
+- `show spanning-tree summary`
 - `show running-config`
 - Interface Mapping 확인
 - Routing Table 분석
 - Subnet Mask 오류 분석
 - Proxy ARP 동작 확인
 - Overlapping Network 오류 해결
+- STP Port Role 분석
+- Root Path Cost 분석
+- Link Failure / Failover 검증
 
 ---
 
 # 대표 실습
 
-## Lab 03 - Router-on-a-Stick
+# Lab 03 - Router-on-a-Stick
 
 <p align="center">
-  <img src="./labs/03-router-on-a-stick/topology.png" alt="Router-on-a-Stick Topology" width="850">
+  <img src="./labs/03-router-on-a-stick/topology.png" alt="Router-on-a-Stick Topology" width="900">
 </p>
 
 서로 다른 VLAN에 위치한 PC 간 통신을 위해  
 **Router-on-a-Stick 방식의 Inter-VLAN Routing**을 구성했습니다.
-
-구성:
 
 ```text
 PC0
@@ -194,7 +221,7 @@ interface gigabitethernet 0/0.20
  ip address 192.168.20.1 255.255.255.0
 ```
 
-주요 학습 내용:
+### 주요 학습 내용
 
 - VLAN 10 / VLAN 20
 - Access Port
@@ -216,7 +243,7 @@ interface gigabitethernet 0/0.20
 # Lab 04 - Static Routing
 
 <p align="center">
-  <img src="./labs/04-static-routing/topology.png" alt="Static Routing Topology" width="850">
+  <img src="./labs/04-static-routing/topology.png" alt="Static Routing Topology" width="900">
 </p>
 
 서로 다른 두 LAN을 두 대의 Router로 연결하고  
@@ -246,19 +273,19 @@ PC1
 192.168.20.20/24
 ```
 
-Router0 Static Route:
+Router0:
 
 ```cisco
 ip route 192.168.20.0 255.255.255.0 10.0.0.2
 ```
 
-Router1 Static Route:
+Router1:
 
 ```cisco
 ip route 192.168.10.0 255.255.255.0 10.0.0.1
 ```
 
-Routing Table에서 다음과 같은 Route를 확인했습니다.
+Routing Table:
 
 ```text
 C = Connected
@@ -266,7 +293,7 @@ L = Local
 S = Static
 ```
 
-주요 학습 내용:
+### 주요 학습 내용
 
 - Router-to-Router Network
 - `/30` Point-to-Point Network
@@ -291,7 +318,7 @@ S = Static
 # Lab 05 - IPv4 Subnetting
 
 <p align="center">
-  <img src="./labs/05-ipv4-subnetting/topology.png" alt="IPv4 Subnetting Topology" width="850">
+  <img src="./labs/05-ipv4-subnetting/topology.png" alt="IPv4 Subnetting Topology" width="900">
 </p>
 
 하나의:
@@ -303,10 +330,9 @@ S = Static
 Network를 `/26`으로 Subnetting하여 서로 다른 두 LAN을 만들고  
 Router를 이용하여 Subnet 간 통신을 구성했습니다.
 
-사용한 Subnet:
+Subnet 1:
 
 ```text
-Subnet 1
 192.168.10.0/26
 
 Network   : 192.168.10.0
@@ -314,8 +340,9 @@ Host      : 192.168.10.1 ~ 192.168.10.62
 Broadcast : 192.168.10.63
 ```
 
+Subnet 2:
+
 ```text
-Subnet 2
 192.168.10.64/26
 
 Network   : 192.168.10.64
@@ -355,7 +382,7 @@ C 192.168.10.0/26
 C 192.168.10.64/26
 ```
 
-주요 학습 내용:
+### 주요 학습 내용
 
 - CIDR
 - Subnet Mask
@@ -373,6 +400,211 @@ C 192.168.10.64/26
 ➡️ [Lab 05 상세 README](./labs/05-ipv4-subnetting/README.md)
 
 ➡️ [Packet Tracer 파일](./labs/05-ipv4-subnetting/05-ipv4-subnetting.pkt)
+
+---
+
+# Lab 06 - STP / RSTP
+
+<p align="center">
+  <img src="./labs/06-stp-rstp/topology.png" alt="STP RSTP Topology" width="900">
+</p>
+
+Switch 3대를 삼각형 형태로 연결하여  
+**Layer 2 Redundancy와 STP / RSTP 동작을 직접 확인**했습니다.
+
+```text
+                 Switch0
+                /       \
+               /         \
+          Switch1 ----- Switch2
+             |             |
+            PC0           PC1
+```
+
+중복 경로를 모두 Forwarding 상태로 두면 Layer 2 Loop가 발생할 수 있기 때문에  
+STP가 일부 경로를 논리적으로 차단하는 것을 확인했습니다.
+
+초기 Root Bridge:
+
+```text
+Switch0
+Priority = 32768
+```
+
+Switch1:
+
+```text
+Gi0/1 → Root FWD
+Gi0/2 → Altn BLK
+```
+
+즉 하나의 경로는 정상 Forwarding하고,
+다른 경로는 Loop 방지를 위한 Alternate / Blocking 상태로 유지되었습니다.
+
+---
+
+## STP Link Failure 테스트
+
+기존 Root Port Link를 제거한 후:
+
+```text
+Gi0/2
+Altn BLK
+```
+
+였던 Port가:
+
+```text
+Gi0/2
+Root FWD
+```
+
+로 변경되는 것을 확인했습니다.
+
+기존 Root Path Cost:
+
+```text
+4
+```
+
+대체 경로 사용 후:
+
+```text
+4 + 4 = 8
+```
+
+로 변경되었습니다.
+
+---
+
+## Root Bridge 직접 지정
+
+Switch2의 Priority를 낮춰 원하는 Switch를 Root Bridge로 지정했습니다.
+
+```cisco
+configure terminal
+
+spanning-tree vlan 1 priority 24576
+
+end
+```
+
+확인:
+
+```text
+Root ID Priority 24577
+
+This bridge is the root
+```
+
+따라서:
+
+```text
+Switch2 = Root Bridge
+```
+
+로 변경되었습니다.
+
+---
+
+## Rapid PVST+ 적용
+
+모든 Switch에서:
+
+```cisco
+configure terminal
+
+spanning-tree mode rapid-pvst
+
+end
+```
+
+설정했습니다.
+
+확인 결과:
+
+```text
+Spanning tree enabled protocol rstp
+```
+
+를 통해 RSTP 기반 Rapid PVST+가 활성화된 것을 확인했습니다.
+
+---
+
+## RSTP Failover 테스트
+
+Switch0에서 Root Bridge인 Switch2로 연결된 Interface를 비활성화했습니다.
+
+```cisco
+interface gigabitethernet 0/2
+ shutdown
+```
+
+기존:
+
+```text
+Switch0 → Switch2
+
+Root Path Cost = 4
+```
+
+장애 후:
+
+```text
+Switch0 → Switch1 → Switch2
+
+Root Path Cost = 8
+```
+
+로 경로가 변경되었습니다.
+
+출력:
+
+```text
+Root ID
+Cost 8
+Port GigabitEthernet0/1
+
+Gi0/1 Root FWD Cost 4
+```
+
+대체 경로를 통해 PC0 ↔ PC1 Ping도 정상적으로 성공했습니다.
+
+장애 테스트 후:
+
+```cisco
+interface gigabitethernet 0/2
+ no shutdown
+```
+
+으로 Interface를 복구했습니다.
+
+### 주요 학습 내용
+
+- Layer 2 Loop
+- Broadcast Storm
+- STP
+- RSTP
+- Rapid PVST+
+- Root Bridge
+- Bridge ID
+- Bridge Priority
+- Root Port
+- Designated Port
+- Alternate Port
+- Forwarding / Blocking
+- STP Path Cost
+- Root Path Cost
+- Layer 2 Redundancy
+- Link Failure
+- Failover
+- Root Bridge 직접 지정
+- Topology Recalculation
+- Interface Shutdown / Recovery
+
+➡️ [Lab 06 상세 README](./labs/06-stp-rstp/README.md)
+
+➡️ [Packet Tracer 파일](./labs/06-stp-rstp/06-stp-rstp.pkt)
 
 ---
 
@@ -405,15 +637,13 @@ up / up
 
 상태였습니다.
 
-따라서 물리적인 Link Down이나 `shutdown` 문제가 아닌 것으로 판단했습니다.
-
 이후:
 
 ```cisco
 show cdp neighbors
 ```
 
-명령어를 이용해 실제 Router 간 연결 Interface를 확인했습니다.
+명령어로 실제 Router 간 연결 Interface를 확인했습니다.
 
 확인 결과 Router1의 IP Address가 실제 케이블 연결 구조와 반대로 설정되어 있었습니다.
 
@@ -424,14 +654,14 @@ Router1 G0/0 → 192.168.20.1/24
 Router1 G0/1 → 10.0.0.2/30
 ```
 
-실제 연결 구조:
+실제 구조:
 
 ```text
 Router1 G0/0 → Router0
 Router1 G0/1 → Switch1
 ```
 
-따라서 다음과 같이 수정했습니다.
+수정:
 
 ```text
 Router1 G0/0 → 10.0.0.2/30
@@ -442,22 +672,14 @@ Router1 G0/1 → 192.168.20.1/24
 
 ### 배운 점
 
-`up/up`은 Interface와 Line Protocol이 동작하고 있다는 의미이지,  
-**의도한 상대 장비 또는 올바른 Network가 해당 Interface에 연결되어 있다는 의미는 아닙니다.**
-
-실제 연결 관계를 확인할 때:
-
-```cisco
-show cdp neighbors
-```
-
-를 활용할 수 있다는 것을 확인했습니다.
+`up/up`은 Interface와 Line Protocol이 동작한다는 의미이며,  
+의도한 Network와 올바른 상대 장비가 연결되었다는 의미는 아닙니다.
 
 ---
 
 ## 2. Overlapping Network 오류
 
-Router1 Interface의 IP Address를 변경하는 과정에서:
+Interface IP Address 변경 과정에서:
 
 ```text
 % 10.0.0.0 overlaps with GigabitEthernet0/1
@@ -465,32 +687,20 @@ Router1 Interface의 IP Address를 변경하는 과정에서:
 
 오류가 발생했습니다.
 
-기존 Interface에 이미:
-
-```text
-10.0.0.0/30
-```
-
-Network에 속하는 IP가 존재했기 때문입니다.
-
-기존 IP를:
+기존 Interface에 같은 Network가 설정되어 있었기 때문입니다.
 
 ```cisco
 no ip address
 ```
 
-로 먼저 제거한 후 올바른 Interface에 다시 설정하여 해결했습니다.
-
-### 배운 점
-
-Router의 서로 다른 Routed Interface에  
-서로 겹치는 IPv4 Network를 설정해서는 안 됩니다.
+로 기존 IP Address를 먼저 제거한 후
+올바른 Interface에 다시 설정하여 해결했습니다.
 
 ---
 
 ## 3. 잘못된 Subnet Mask와 Proxy ARP
 
-IPv4 Subnetting Lab에서 PC0의 정상 설정:
+PC0의 정상 설정:
 
 ```text
 192.168.10.10/26
@@ -502,22 +712,13 @@ IPv4 Subnetting Lab에서 PC0의 정상 설정:
 192.168.10.10/24
 ```
 
-로 잘못 변경했습니다.
+로 변경했습니다.
 
-PC0는 목적지:
+PC0는 `192.168.10.70`을 같은 Local Network에 있다고 잘못 판단했습니다.
 
-```text
-192.168.10.70
-```
+하지만 예상과 다르게 Ping이 성공했습니다.
 
-을 같은 Local Network에 있다고 잘못 판단하게 됩니다.
-
-원래라면 목적지 Host의 MAC Address를 직접 찾기 위해 ARP를 수행하고  
-Router 반대편에 있는 PC1과의 통신에 문제가 발생할 수 있습니다.
-
-그러나 예상과 다르게 Ping이 성공했습니다.
-
-Router Interface를 확인했습니다.
+Router에서:
 
 ```cisco
 show ip interface gigabitethernet 0/0
@@ -530,9 +731,6 @@ Proxy ARP is enabled
 ```
 
 상태였습니다.
-
-Router가 목적지 대신 자신의 MAC Address로 ARP Reply를 보내면서  
-잘못된 Subnet Mask 설정에서도 통신이 가능했습니다.
 
 Proxy ARP를 비활성화했습니다.
 
@@ -547,12 +745,11 @@ PC0의 ARP Cache도 삭제했습니다.
 arp -d
 ```
 
-다시 Ping을 수행하자 잘못된 `/24` 상태에서는 통신이 실패했습니다.
+이후 잘못된 `/24` 상태에서 Ping이 실패하는 것을 확인했습니다.
 
-PC0의 Subnet Mask를 정상적인 `/26`으로 복구한 후  
-다시 통신이 정상적으로 성공하는 것을 확인했습니다.
+Subnet Mask를 정상 `/26`으로 복구한 후 다시 통신에 성공했습니다.
 
-실습 후 Proxy ARP도 다시 활성화했습니다.
+실습 종료 후 Proxy ARP도 복구했습니다.
 
 ```cisco
 interface gigabitethernet 0/0
@@ -563,8 +760,60 @@ interface gigabitethernet 0/0
 
 **Ping이 성공한다는 사실만으로 Network 설정이 모두 올바르다고 판단해서는 안 됩니다.**
 
-Proxy ARP와 같은 기능이 잘못된 설정을 겉으로 가릴 수 있기 때문에  
-실제 IP Address, Subnet Mask, Gateway, ARP Table, Routing Table까지 함께 확인해야 합니다.
+Proxy ARP와 같은 기능이 잘못된 설정을 겉으로 가릴 수 있으므로
+IP Address, Subnet Mask, Gateway, ARP, Routing Table을 함께 확인해야 합니다.
+
+---
+
+## 4. STP 중복 경로와 Link Failure
+
+Switch 3대를 삼각형으로 연결하자 하나의 Port가:
+
+```text
+Altn BLK
+```
+
+상태가 되는 것을 확인했습니다.
+
+이는 장애가 아니라 STP가 Layer 2 Loop를 방지하기 위해
+중복 경로 중 하나를 의도적으로 차단한 결과였습니다.
+
+기존 Root Port Link를 제거하자:
+
+```text
+Altn BLK
+```
+
+상태였던 대체 경로가:
+
+```text
+Root FWD
+```
+
+로 변경되었습니다.
+
+이후 Rapid PVST+ 환경에서 Interface를 직접 Shutdown하여
+장애 상황을 다시 만들었습니다.
+
+```cisco
+interface gigabitethernet 0/2
+ shutdown
+```
+
+RSTP가 새로운 경로를 계산하면서:
+
+```text
+Root Path Cost
+4 → 8
+```
+
+로 변경되었고,
+대체 경로를 통해 PC 간 통신이 계속 가능한 것을 확인했습니다.
+
+### 배운 점
+
+STP / RSTP는 단순히 중복 Link를 차단하는 기술이 아니라  
+**Loop를 방지하면서도 장애 발생 시 대체 경로를 사용할 수 있도록 하는 Layer 2 Redundancy 기술**이라는 것을 확인했습니다.
 
 ---
 
@@ -580,10 +829,11 @@ Proxy ARP와 같은 기능이 잘못된 설정을 겉으로 가릴 수 있기 �
 | /29 | 255.255.255.248 | 8 | 6 | 8 |
 | /30 | 255.255.255.252 | 4 | 2 | 4 |
 
-Block Size 계산:
+Block Size:
 
 ```text
-Block Size = 256 - Subnet Mask의 해당 Octet
+Block Size
+= 256 - Subnet Mask의 해당 Octet
 ```
 
 예:
@@ -592,10 +842,11 @@ Block Size = 256 - Subnet Mask의 해당 Octet
 /26
 255.255.255.192
 
-256 - 192 = 64
+256 - 192
+= 64
 ```
 
-따라서 Network 시작점:
+Network 시작점:
 
 ```text
 0
@@ -604,53 +855,106 @@ Block Size = 256 - Subnet Mask의 해당 Octet
 192
 ```
 
-Broadcast Address:
+Broadcast:
 
 ```text
 다음 Network Address - 1
 ```
 
-Host Range:
+Host:
 
 ```text
-First Host = Network Address + 1
-Last Host  = Broadcast Address - 1
+First Host = Network + 1
+Last Host  = Broadcast - 1
+```
+
+---
+
+# STP / RSTP Quick Reference
+
+```text
+Root Bridge
+→ STP Tree의 기준 Switch
+
+Root Port
+→ Non-Root Switch가 Root Bridge로 가는 최적 Port
+
+Designated Port
+→ 해당 Segment에서 Forwarding을 담당하는 Port
+
+Alternate Port
+→ 주 경로 장애에 대비한 대체 경로
+
+FWD
+→ Forwarding
+
+BLK
+→ Blocking
+```
+
+STP 기본 흐름:
+
+```text
+Root Bridge 선정
+        ↓
+Root Port 선정
+        ↓
+Designated Port 선정
+        ↓
+중복 경로 차단
+```
+
+Path Cost 예:
+
+```text
+FastEthernet
+100 Mbps
+→ Cost 19
+
+GigabitEthernet
+1 Gbps
+→ Cost 4
 ```
 
 ---
 
 # 주요 Cisco IOS 명령어
 
-## Switch 확인
-
-```cisco
-show mac address-table
-show interfaces status
-show vlan brief
-show interfaces trunk
-show running-config
-```
-
-## Router 확인
-
-```cisco
-show ip interface brief
-show ip interface
-show ip route
-show cdp neighbors
-show running-config
-```
-
-## Interface 설정
+## 기본 CLI
 
 ```cisco
 enable
 configure terminal
+```
 
-interface <interface>
+---
+
+## Interface 설정
+
+```cisco
+interface gigabitethernet 0/0
  ip address <IP Address> <Subnet Mask>
  no shutdown
 ```
+
+---
+
+## Interface 상태
+
+```cisco
+show ip interface brief
+show interfaces status
+```
+
+---
+
+## Routing Table
+
+```cisco
+show ip route
+```
+
+---
 
 ## Static Route
 
@@ -664,36 +968,104 @@ ip route <Destination Network> <Subnet Mask> <Next Hop>
 ip route 192.168.20.0 255.255.255.0 10.0.0.2
 ```
 
-## IP 제거
+---
+
+## CDP
 
 ```cisco
-interface <interface>
- no ip address
+show cdp neighbors
 ```
 
-## DNS Lookup 비활성화
+---
+
+## MAC Address Table
 
 ```cisco
-no ip domain lookup
+show mac address-table
 ```
+
+---
+
+## VLAN
+
+```cisco
+show vlan brief
+```
+
+---
+
+## Trunk
+
+```cisco
+show interfaces trunk
+```
+
+---
+
+## STP / RSTP
+
+```cisco
+show spanning-tree vlan 1
+show spanning-tree summary
+```
+
+---
+
+## Root Bridge Priority
+
+```cisco
+spanning-tree vlan 1 priority 24576
+```
+
+---
+
+## Rapid PVST+
+
+```cisco
+spanning-tree mode rapid-pvst
+```
+
+---
+
+## Interface 장애 생성
+
+```cisco
+interface gigabitethernet 0/2
+ shutdown
+```
+
+복구:
+
+```cisco
+interface gigabitethernet 0/2
+ no shutdown
+```
+
+---
 
 ## Proxy ARP
+
+확인:
+
+```cisco
+show ip interface gigabitethernet 0/0
+```
 
 비활성화:
 
 ```cisco
-interface <interface>
- no ip proxy-arp
+no ip proxy-arp
 ```
 
 활성화:
 
 ```cisco
-interface <interface>
- ip proxy-arp
+ip proxy-arp
 ```
 
-## End Device 확인
+---
+
+## 통신 / End Device
 
 ```text
 ping <IP Address>
@@ -733,7 +1105,7 @@ arp -d
 - [x] Static Routing
 - [x] Next Hop
 - [x] Routing Table
-- [x] Static Route 확인
+- [x] Static Route
 - [x] CDP
 - [x] `tracert`
 - [x] Interface Troubleshooting
@@ -762,13 +1134,38 @@ arp -d
 
 ---
 
+## Day 4
+
+- [x] Layer 2 Loop
+- [x] Broadcast Storm
+- [x] STP
+- [x] Root Bridge
+- [x] Bridge ID
+- [x] Bridge Priority
+- [x] Root Port
+- [x] Designated Port
+- [x] Alternate Port
+- [x] Forwarding / Blocking
+- [x] STP Path Cost
+- [x] Root Path Cost
+- [x] Link Failure / Failover
+- [x] Root Bridge 직접 지정
+- [x] STP Tree 재계산
+- [x] Rapid PVST+
+- [x] RSTP
+- [x] Interface Shutdown 장애 실험
+- [x] 대체 경로 전환
+- [x] End-to-End Ping 검증
+
+---
+
 # 다음 학습
 
-- [ ] STP / RSTP
-- [ ] Root Bridge
-- [ ] STP Port Role
-- [ ] EtherChannel / LACP
+- [ ] EtherChannel
+- [ ] LACP
+- [ ] Link Aggregation
 - [ ] OSPF
+- [ ] Dynamic Routing
 - [ ] DHCP
 - [ ] DHCP Relay
 - [ ] NAT / PAT
@@ -800,10 +1197,15 @@ ccna-network-labs/
     │   ├── topology.png
     │   └── 04-static-routing.pkt
     │
-    └── 05-ipv4-subnetting/
+    ├── 05-ipv4-subnetting/
+    │   ├── README.md
+    │   ├── topology.png
+    │   └── 05-ipv4-subnetting.pkt
+    │
+    └── 06-stp-rstp/
         ├── README.md
         ├── topology.png
-        └── 05-ipv4-subnetting.pkt
+        └── 06-stp-rstp.pkt
 ```
 
 각 Lab은 가능한 경우 다음 형식으로 관리합니다.
@@ -823,8 +1225,8 @@ topology.png
 
 # Troubleshooting 접근 방식
 
-Network 장애가 발생했을 때 무작정 설정을 변경하기보다  
-다음 순서로 확인하는 습관을 만드는 것을 목표로 합니다.
+Network 장애가 발생했을 때 무작정 설정을 변경하기보다
+다음과 같은 순서로 원인을 좁히는 습관을 만드는 것을 목표로 합니다.
 
 ```text
 1. Physical / Interface 상태 확인
@@ -835,15 +1237,17 @@ Network 장애가 발생했을 때 무작정 설정을 변경하기보다
         ↓
 4. VLAN / Trunk 상태 확인
         ↓
-5. ARP / MAC Address Table 확인
+5. STP / Port State 확인
         ↓
-6. Routing Table 확인
+6. ARP / MAC Address Table 확인
         ↓
-7. Ping / Traceroute로 경로 검증
+7. Routing Table 확인
         ↓
-8. 원인 수정
+8. Ping / Traceroute로 경로 검증
         ↓
-9. 정상 통신 재검증
+9. 원인 수정
+        ↓
+10. 정상 통신 재검증
 ```
 
 ---
@@ -858,12 +1262,16 @@ CCNA 학습 과정에서 Cisco Packet Tracer를 이용해 직접 Network를 구�
 
 단순히 Cisco IOS 명령어를 입력할 수 있는 수준이 아니라,
 
-- Packet이 어떤 경로로 전달되는지
 - Switch가 MAC Address를 어떻게 학습하는지
+- Ethernet Frame이 어떻게 전달되는지
 - ARP가 어떤 상황에서 동작하는지
 - VLAN이 Broadcast Domain을 어떻게 분리하는지
-- Router가 Routing Table을 어떻게 사용하는지
+- Router가 IP Address와 Routing Table을 어떻게 사용하는지
 - Subnet Mask가 Local / Remote Network 판단에 어떤 영향을 주는지
+- Static Route와 Next Hop이 어떤 역할을 하는지
+- STP가 Layer 2 Loop를 어떻게 방지하는지
+- Root Bridge와 Port Role이 어떻게 선정되는지
+- 중복 Link 장애 시 대체 경로가 어떻게 활성화되는지
 - 장애가 발생했을 때 어떤 명령어로 원인을 좁혀야 하는지
 
 를 직접 설명하고 검증할 수 있는 수준까지 학습하는 것이 목표입니다.
